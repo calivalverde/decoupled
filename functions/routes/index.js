@@ -1,44 +1,53 @@
 const express = require("express");
 const router = express.Router();
 
+const admin = require("firebase-admin");
+
+const serviceAccount = require("../../config/firebase.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://decoupled-95c8c.firebaseio.com"
+});
+
+const db = admin.firestore();
+
 router.get("/", (req, res, next) => {
   res.send("Estamos en API");
 });
 
-router.get("/json", (req, res, next) => {
-  res.send({
-    glossary: {
-      title: "example glossary",
-      GlossDiv: {
-        title: "S",
-        GlossList: {
-          GlossEntry: {
-            ID: "SGML",
-            SortAs: "SGML",
-            GlossTerm: "Standard Generalized Markup Language",
-            Acronym: "SGML",
-            Abbrev: "ISO 8879:1986",
-            GlossDef: {
-              para:
-                "A meta-markup language, used to create markup languages such as DocBook.",
-              GlossSeeAlso: ["GML", "XML"]
-            },
-            GlossSee: "markup"
-          }
-        }
-      }
+router.get("/pets", async (req, res, next) => {
+  try {
+    const petsSnapshot = await db.collection("pet").get();
+    const pets = [];
+    petsSnapshot.forEach(doc => {
+      pets.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    res.json(pets);
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+router.get("/pets/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    if (!id) throw new Error("id is blank");
+    const pet = await db
+      .collection("pet")
+      .doc(id)
+      .get();
+    if (!pet.exists) {
+      throw new Error("pet does not exists");
     }
-  });
+    res.json({
+      data: pet.data()
+    });
+  } catch (e) {
+    next(e);
+  }
 });
-
-// Contact From
-router.post("/contact", (req, res) => {
-  const { name } = req.body;
-  return res.json({
-    status: "OK",
-    name,
-    msg: "Se editaron correctamente los campos."
-  });
-});
-
 module.exports = router;
