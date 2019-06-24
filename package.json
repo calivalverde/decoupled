@@ -1,0 +1,20 @@
+{
+  "name": "decoupled",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build-admin": "npm run-script build --prefix src/admin",
+    "build-front": "npm run-script build --prefix src/front",
+    "build": "npm run build-admin && npm run build-front"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calivalverde/decoupled.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/calivalverde/decoupled/issues"
+  },
+  "homepage": "https://decoupled-95c8c.firebaseapp.com/"
+}
